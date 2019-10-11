@@ -1,5 +1,7 @@
 plugins {
         id 'groovy'
+		id 'maven'
+		 id 'maven-publish'
 }
 
 group = 'sybrix-easygsp2'
@@ -11,6 +13,7 @@ repositories {
         mavenCentral()
         mavenLocal()
 }
+
 
 dependencies {
         compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.13'
@@ -38,6 +41,34 @@ dependencies {
         compileOnly group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.10.0'
         compileOnly group: 'javax.persistence', name: 'persistence-api', version: '1.0.2'
 }
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier = 'sources'
+}
+
+//task javadocJar(type: Jar) {
+//    from javadoc
+//    archiveClassifier = 'javadoc'
+//}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            artifact sourcesJar {
+                classifier "sources"
+            }
+        }
+    }
+}
+
+artifacts {
+//    archives javadocJar    
+    archives sourcesJar 
+}
+
 
 
 apply plugin: 'idea'
