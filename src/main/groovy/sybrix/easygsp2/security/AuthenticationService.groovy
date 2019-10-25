@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletRequest
 interface AuthenticationService {
         public Long validateCredentials(String username, String password) throws UnauthorizedException
 
+        public Long validatePhoneCredentials(String phone, String code) throws UnauthorizedException
+
         public List<String> getRoles(String id)
 
         public Client addClient(String name)

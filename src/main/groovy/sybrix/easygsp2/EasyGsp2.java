@@ -175,15 +175,15 @@ public class EasyGsp2 {
                         // load DB String queries
                         ThreadBag.set(new ThreadVariables(servletContext));
 
+                        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+                        validator = factory.getValidator();
+
                         if (appListenerClass != null) {
                                 Class cls = Class.forName(appListenerClass, false, groovyClassLoader);
                                 //appListener = (AppListener) cls.newInstance();
                                 appListener = (AppListener) ClassFactory.create(cls, this);
                                 appListener.onApplicationStart(servletContext);
                         }
-
-                        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-                        validator = factory.getValidator();
 
                 } catch (Throwable e) {
                         logger.error("error occurred easygsp init()", e);
@@ -195,6 +195,7 @@ public class EasyGsp2 {
         private void loadDefaultRoutes() {
                 if (propertiesFile.getBoolean("jwt.controller.enabled", false)) {
                         Routes.add("POST", propertiesFile.getString("jwt.token.url", "/api/token"), JwtController.class, "generateToken", new Class[]{HttpServletRequest.class, HttpServletResponse.class}, null, new String[]{MediaType.JSON}, new String[]{MediaType.JSON}, false);
+                        Routes.add("POST", propertiesFile.getString("jwt.tokenMobile.url", "/api/tokenMobile"), JwtController.class, "generateTokenFromPhone", new Class[]{HttpServletRequest.class, HttpServletResponse.class}, null, new String[]{MediaType.JSON}, new String[]{MediaType.JSON}, false);
                         Routes.add("POST", "/client", JwtController.class, "createClient", new Class[]{CreateClientRequest.class, HttpServletRequest.class}, new String[]{}, new String[]{MediaType.JSON}, new String[]{MediaType.JSON}, true);
                 }
         }

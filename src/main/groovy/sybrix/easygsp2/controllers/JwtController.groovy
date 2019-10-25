@@ -42,9 +42,32 @@ class JwtController {
                 authenticate(emailAddress, password, expirySeconds, request.getServletContext())
         }
 
-        public TokenResponse authenticate(String emailAddress, String password, Long expirySeconds, ServletContext context) {
+        public TokenResponse generateTokenFromPhone(HttpServletRequest request, HttpServletResponse response) {
+                String authorizationHeader = request.getHeader("Authorization");
 
-                Long profileId = authenticationService.validateCredentials(emailAddress, password)
+                if (authorizationHeader ==null){
+                        throw new BadRequestException("Missing \"Authorization\" header")
+                }
+                String decodedAuthorizationHeader = new String(Base64.decode(authorizationHeader.substring(6)))
+
+                def parts = decodedAuthorizationHeader.split(":")
+                String phone = parts[0]
+                String code = parts[1]
+
+                PropertiesFile propertiesFile = (PropertiesFile) request.getServletContext().getAttribute(PropertiesFile.KEY)
+                Long expirySeconds = propertiesFile.getLong("jwt.expires_in_seconds", (60 * 60 * 24))
+
+                authenticate(phone, code, expirySeconds, request.getServletContext())
+        }
+
+        public TokenResponse authenticate(String emailAddress, String password, Long expirySeconds, ServletContext context) {
+                Long profileId = null
+
+                if ( emailAddress.matches("\\d{10}")) {
+                        profileId = authenticationService.validatePhoneCredentials(emailAddress, password)
+                } else {
+                        profileId = authenticationService.validateCredentials(emailAddress, password)
+                }
 
                 // 24 hours default
 
