@@ -85,8 +85,8 @@ public class Route {
                 }
         }
 
-        public boolean matches(HttpServletRequest request) {
-                String path = request.getRequestURI();
+        public boolean matches(String uri, String method) {
+                String path = uri;
 
                 Matcher matcher = pattern.matcher(path);
 
@@ -100,7 +100,7 @@ public class Route {
                                 }
                         }
 
-                        return httpMethod.equalsIgnoreCase(request.getMethod());
+                        return httpMethod.equalsIgnoreCase(method);
 
                 }
 

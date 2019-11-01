@@ -16,6 +16,7 @@
 
 package sybrix.easygsp2.framework;
 
+import groovy.lang.Binding;
 import groovy.lang.GroovyObject;
 
 import javax.servlet.ServletContext;
@@ -106,10 +107,10 @@ public class CustomServletCategory {
                 request.getRequestDispatcher(s).forward(request,response);
         }
 
-//        public static void bind(GroovyObject self, String name, Object val) throws IOException, ServletException {
-//                Binding binding = (Binding) self.getProperty("binding");
-//                binding.setVariable(name, val);
-//        }
+        public static void bind(GroovyObject self, String name, Object val) throws IOException, ServletException {
+                Binding binding = ThreadBag.get().getBinding();
+                binding.setVariable(name, val);
+        }
 //
 //        public static void bind(GroovyObject self, Map<String,Object> values) throws IOException, ServletException {
 //                Binding binding = (Binding) self.getProperty("binding");

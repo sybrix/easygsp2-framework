@@ -152,11 +152,18 @@ public class EasyGsp2 {
 
                         ThreadBag.set(new ThreadVariables(this.context, null, null, routes, null, null, groovyClassLoader));
 
-                        Class clsAuth = Class.forName(propertiesFile.getString("authentication.service"));
-                        authenticationService = (AuthenticationService) clsAuth.newInstance();
+                        if (propertiesFile.getString("authentication.service") != null) {
+                                Class clsAuth = Class.forName(propertiesFile.getString("authentication.service"));
+                                authenticationService = (AuthenticationService) clsAuth.newInstance();
+                        } else {
+                                logger.debug("No authentication.service value found");
+                        }
 
-                        emailService = (EmailService) Class.forName(propertiesFile.getString("email.service")).newInstance();
-
+                        if (propertiesFile.getString("email.service") != null) {
+                                emailService = (EmailService) Class.forName(propertiesFile.getString("email.service")).newInstance();
+                        } else {
+                                logger.debug("No email.service value found");
+                        }
 
                         loadDefaultRoutes();//1
                         loadApiMethods(propertiesFile);//2
@@ -247,7 +254,14 @@ public class EasyGsp2 {
 
         public boolean doRequest(final EasyGspServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException {
 
-                final String uri = httpServletRequest.getRequestURI();
+                String uri = null;
+                String contextPath = httpServletRequest.getServletContext().getContextPath();
+                if (contextPath.length() > 1) {
+                        uri = httpServletRequest.getRequestURI().substring(contextPath.length());
+                } else {
+                        uri = httpServletRequest.getRequestURI();
+                }
+
 
                 logger.debug("processing web request, method: " + httpServletRequest.getMethod() + ", uri: " + uri);
                 Boolean continueFilterChain = false;
@@ -273,7 +287,7 @@ public class EasyGsp2 {
                         ThreadBag.set(new ThreadVariables(this.context, httpServletRequest, httpServletResponse, routes, null, null, groovyClassLoader));
                         logger.debug("searching for matching route for uri: " + uri);
 
-                        final sybrix.easygsp2.routing.Route route = findRoute(httpServletRequest);
+                        final sybrix.easygsp2.routing.Route route = findRoute(uri,httpServletRequest.getMethod());
                         if (route == null) {
                                 if (httpServletRequest.getMethod().equalsIgnoreCase("GET")) {
                                         logger.warn("remember- unannotated get() requires an Id parameter {<\\d+$>id}, index() does not");
@@ -1491,15 +1505,15 @@ public class EasyGsp2 {
         }
 
 
-        public static sybrix.easygsp2.routing.Route findRoute(HttpServletRequest servletRequest) {
+        public static sybrix.easygsp2.routing.Route findRoute(String uri, String method) {
                 for (sybrix.easygsp2.routing.Route r : routes.values()) {
-                        if (r.matches(servletRequest)) {
+                        if (r.matches(uri, method)) {
                                 logger.debug("matching route found! " + r.toString());
                                 return r;
                         }
                 }
 
-                logger.debug("no matching route found for " + servletRequest.getRequestURI());
+                logger.debug("no matching route found for " + uri);
 
                 return null;
         }
