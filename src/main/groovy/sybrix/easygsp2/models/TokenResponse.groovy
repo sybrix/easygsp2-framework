@@ -4,4 +4,6 @@ class TokenResponse {
     String idToken
     String tokenType
     String username
+    Long expiryDays
 }
+
