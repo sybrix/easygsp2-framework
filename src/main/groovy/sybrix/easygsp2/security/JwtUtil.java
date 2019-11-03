@@ -132,7 +132,7 @@ public class JwtUtil {
                                 }
                         }
 
-                        Cookie c = getCookie("mto", request);
+                        Cookie c = getCookie("mt1_token", request);
                         if (c != null) {
                                 String val = c.getValue().split("\\|")[0];
                                 Jws<io.jsonwebtoken.Claims> claims = Jwts.parser().setSigningKey(key).parseClaimsJws(val);
