@@ -15,7 +15,8 @@ class GroovyBeanUtil {
                                 if (!excludeFromSource.contains(it.name)) {
                                         destination[it.name] = source[it.name]
                                 }
-
+                        } catch (MissingPropertyException e) {
+                                log.debug(e.getMessage())
                         } catch (Exception e) {
                                 log.error(e.getMessage(), e)
                         }
