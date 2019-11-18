@@ -4,9 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BadRequestException extends HttpException {
+        public void setConstraintErrors(List constraintErrors) {
+                this.constraintErrors = constraintErrors;
+        }
+
         List constraintErrors = new ArrayList();
 
         public BadRequestException(List constraintErrors) {
+                this();
                 this.constraintErrors = constraintErrors;
         }
 

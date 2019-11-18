@@ -11,4 +11,5 @@ class ApiError {
         }
         Integer code
         String message
+        List<Object> messages = []
 }

@@ -54,7 +54,7 @@ class JwtController {
                 String phone = parts[0]
                 String code = parts[1]
 
-                PropertiesFile propertiesFile = (PropertiesFile) request.getServletContext().getAttribute(PropertiesFile.KEY)
+                //PropertiesFile propertiesFile = (PropertiesFile) request.getServletContext().getAttribute(PropertiesFile.KEY)
                 Long expirySeconds = propertiesFile.getLong("jwt.expires_in_seconds", (60 * 60 * 24))
 
                 authenticateCode(phone, code, expirySeconds, request.getServletContext())
@@ -70,11 +70,14 @@ class JwtController {
         public TokenResponse authenticatePassword(String emailAddress, String password, Long expirySeconds, ServletContext context) {
                 Long profileId = authenticationService.validateCredentials(emailAddress, password)
 
-                authenticate(profileId,emailAddress, expirySeconds, context)
-
+                authenticate(profileId, emailAddress, expirySeconds, context)
         }
 
         public TokenResponse authenticate(Long profileId, String emailAddress, Long expirySeconds, ServletContext context) {
+                authenticate(profileId, emailAddress, expirySeconds, context, authenticationService)
+        }
+
+        public static TokenResponse authenticate(Long profileId, String emailAddress, Long expirySeconds, ServletContext context, AuthenticationService authenticationService) {
 
                 // 24 hours default
 

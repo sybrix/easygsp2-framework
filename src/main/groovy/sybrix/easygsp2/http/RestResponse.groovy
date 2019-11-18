@@ -13,6 +13,7 @@ class RestResponse {
         Integer code
         Map<String, String> headers = [:]
         byte[] rawResponse
+        Object jsonObject
 
         def getHeaderValue(String header) {
                 headers.get(header)?.get(0)
@@ -27,7 +28,13 @@ class RestResponse {
         }
 
         def toJson() {
-                new JsonSlurper().parseText(new String(rawResponse))
+                if (!jsonObject) {
+                        jsonObject = new JsonSlurper().parseText(new String(rawResponse))
+                }
+
+                if (jsonObject) {
+                        return jsonObject
+                }
         }
 
         def toXML() {

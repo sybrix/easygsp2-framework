@@ -426,13 +426,14 @@ public class EasyGsp2 {
 
                                                 //checkUserAuthorization(route, httpServletRequest);
 
+                                                isApiController = isApiController(controllerClass);
+                                                returnContentType = getContentReturnType(isApiController, httpServletResponse, acceptHeaderMimeTypes, route, extension);
+
                                                 List errors = validateParameters(params);
                                                 if (errors.size() > 0) {
                                                         throw new BadRequestException(errors);
                                                 }
 
-                                                isApiController = isApiController(controllerClass);
-                                                returnContentType = getContentReturnType(isApiController, httpServletResponse, acceptHeaderMimeTypes, route, extension);
 
                                                 Object _controllerResponse = invokeControllerAction(controller, m, params, route);
 
@@ -572,10 +573,17 @@ public class EasyGsp2 {
                                 if (e.getStatus() == 500) {
                                         ApiError apiError = new ApiError("Server error occurred.  Try again.");
                                         apiError.setCode(e.getStatus());
+                                        if (e instanceof BadRequestException) {
+                                                apiError.setMessages(((BadRequestException) e).getConstraintErrors());
+                                        }
+
                                         msg = jsonSerializerInstance.toString(apiError);
                                 } else {
                                         ApiError apiError = new ApiError(e.getMessage());
                                         apiError.setCode(e.getStatus());
+                                        if (e instanceof BadRequestException) {
+                                                apiError.setMessages(((BadRequestException) e).getConstraintErrors());
+                                        }
                                         msg = jsonSerializerInstance.toString(apiError);
                                 }
 
