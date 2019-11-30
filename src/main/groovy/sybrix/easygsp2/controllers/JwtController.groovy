@@ -100,6 +100,8 @@ class JwtController {
                 tokenResponse.idToken = JwtUtil.instance.create(emailAddress, claims, scopes)
                 tokenResponse.username = emailAddress
                 tokenResponse.expiryDays = expirySeconds / (24 * 60 * 60)
+
+                tokenResponse = authenticationService.tokenResponsePostProcess(tokenResponse)
                 return tokenResponse
         }
 

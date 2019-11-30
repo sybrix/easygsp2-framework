@@ -5,5 +5,6 @@ class TokenResponse {
     String tokenType
     String username
     Long expiryDays
+    Map data = [:]
 }
 
