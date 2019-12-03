@@ -611,7 +611,12 @@ public class EasyGsp2 {
         private void checkUserAuthorization(Route route, EasyGspServletRequest httpServletRequest) throws UnauthorizedException {
                 try {
                         if (route.isSecure()) {
-                                if (route.getRoles().size() == 0 && httpServletRequest.getUserPrincipal() != null) {
+                                UserPrincipal userPrincipal = (UserPrincipal) httpServletRequest.getUserPrincipal();
+                                if (userPrincipal.getId() == null){
+                                        throw new UnauthorizedException();
+                                }
+
+                                if (route.getRoles().size() == 0 ) {
                                         // only authentication is required when route.getRoles.size ==0
                                         return;
                                 }
@@ -623,7 +628,8 @@ public class EasyGsp2 {
                                 }
                                 throw new UnauthorizedException();
                         }
-                } catch (ExpiredJwtException e) {
+
+                } catch (ExpiredJwtException | NullPointerException e) {
                         throw new UnauthorizedException();
                 }
         }
