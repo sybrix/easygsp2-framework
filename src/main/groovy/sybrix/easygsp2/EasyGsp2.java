@@ -161,6 +161,7 @@ public class EasyGsp2 {
 
                         if (propertiesFile.getString("email.service") != null) {
                                 emailService = (EmailService) Class.forName(propertiesFile.getString("email.service")).newInstance();
+                                context.setAttribute("emailService", emailService);
                         } else {
                                 logger.debug("No email.service value found");
                         }
@@ -287,7 +288,7 @@ public class EasyGsp2 {
                         ThreadBag.set(new ThreadVariables(this.context, httpServletRequest, httpServletResponse, routes, null, null, groovyClassLoader));
                         logger.debug("searching for matching route for uri: " + uri);
 
-                        final sybrix.easygsp2.routing.Route route = findRoute(uri,httpServletRequest.getMethod());
+                        final sybrix.easygsp2.routing.Route route = findRoute(uri, httpServletRequest.getMethod());
                         if (route == null) {
                                 if (httpServletRequest.getMethod().equalsIgnoreCase("GET")) {
                                         logger.warn("remember- unannotated get() requires an Id parameter {<\\d+$>id}, index() does not");
@@ -612,11 +613,11 @@ public class EasyGsp2 {
                 try {
                         if (route.isSecure()) {
                                 UserPrincipal userPrincipal = (UserPrincipal) httpServletRequest.getUserPrincipal();
-                                if (userPrincipal.getId() == null){
+                                if (userPrincipal.getId() == null) {
                                         throw new UnauthorizedException();
                                 }
 
-                                if (route.getRoles().size() == 0 ) {
+                                if (route.getRoles().size() == 0) {
                                         // only authentication is required when route.getRoles.size ==0
                                         return;
                                 }
