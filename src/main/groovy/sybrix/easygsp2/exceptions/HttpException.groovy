@@ -2,7 +2,7 @@ package sybrix.easygsp2.exceptions
 
 class HttpException extends RuntimeException {
         protected Integer status
-        String errorCode
+        Integer errorCode
 
         HttpException() {
         }

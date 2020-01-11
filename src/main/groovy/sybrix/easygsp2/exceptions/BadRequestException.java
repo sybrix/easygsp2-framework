@@ -10,6 +10,11 @@ public class BadRequestException extends HttpException {
 
         List constraintErrors = new ArrayList();
 
+        public BadRequestException(Integer errorCode, String message) {
+                this(message);
+                this.setErrorCode(errorCode);
+        }
+
         public BadRequestException(List constraintErrors) {
                 this();
                 this.constraintErrors = constraintErrors;

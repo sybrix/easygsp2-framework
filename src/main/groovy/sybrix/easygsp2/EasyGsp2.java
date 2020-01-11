@@ -581,7 +581,12 @@ public class EasyGsp2 {
                                         msg = jsonSerializerInstance.toString(apiError);
                                 } else {
                                         ApiError apiError = new ApiError(e.getMessage());
-                                        apiError.setCode(e.getStatus());
+                                        if (e.getErrorCode()!=null) {
+                                                apiError.setCode(e.getErrorCode());
+                                        } else {
+                                                apiError.setCode(e.getStatus());
+                                        }
+
                                         if (e instanceof BadRequestException) {
                                                 apiError.setMessages(((BadRequestException) e).getConstraintErrors());
                                         }
