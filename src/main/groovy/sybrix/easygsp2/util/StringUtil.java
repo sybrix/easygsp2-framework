@@ -132,6 +132,27 @@ public class StringUtil {
 
         }
 
+        public static String capitalizeAfterSpace(String val) {
+
+                if (val == null)
+                        return "";
+
+                StringBuffer newColumn = new StringBuffer();
+
+
+                char last = ' ';
+                for (char x : val.toCharArray()) {
+                        if (last == ' ') {
+                                newColumn.append(Character.toUpperCase(x));
+                        } else {
+                                newColumn.append(x);
+                        }
+                        last = x;
+                }
+
+                return newColumn.toString();
+        }
+
         public static String unCamelCase(String column) {
                 StringBuffer newColumn = new StringBuffer();
                 for (int i = 0; i < column.length(); i++) {

@@ -171,8 +171,10 @@ public class JwtUtil {
         }
 
         public static UserPrincipal extractUserPrincipal(HttpServletRequest request) {
-                if (ThreadBag.get().getUserPrincipal() != null) {
-                        return ThreadBag.get().getUserPrincipal();
+                if (ThreadBag.get() != null) {
+                        if (ThreadBag.get().getUserPrincipal() != null) {
+                                return ThreadBag.get().getUserPrincipal();
+                        }
                 }
 
                 String header = request.getHeader("Authorization");
@@ -183,6 +185,14 @@ public class JwtUtil {
                                 ThreadBag.get().setUserPrincipal(userPrincipal);
                                 return userPrincipal;
                         }
+                }
+
+                Cookie c = getCookie("mt1_token", request);
+                if (c != null) {
+                        String jwt = c.getValue().split("\\|")[0];
+                        UserPrincipal userPrincipal = new UserPrincipal(key, jwt);
+
+                        return userPrincipal;
                 }
 
                 return new UserPrincipal();
