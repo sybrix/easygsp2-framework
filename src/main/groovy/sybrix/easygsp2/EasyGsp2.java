@@ -1081,7 +1081,6 @@ public class EasyGsp2 {
                 return null;
         }
 
-
         private void loadPropertiesIntoContext(ServletContext app, PropertiesFile propertiesFile) {
                 for (String s : propertiesFile.stringPropertyNames()) {
                         app.setAttribute(s, propertiesFile.get(s));
