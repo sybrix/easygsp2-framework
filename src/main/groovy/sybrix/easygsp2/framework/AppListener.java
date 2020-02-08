@@ -14,4 +14,5 @@ public interface AppListener {
         void onApplicationStart(ServletContext context);
         void onApplicationEnd();
         void onRequestEnd(HttpServletRequest request);
+        void onRequestStart(HttpServletRequest request);
 }

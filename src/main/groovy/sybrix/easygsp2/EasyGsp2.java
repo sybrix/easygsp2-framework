@@ -255,6 +255,7 @@ public class EasyGsp2 {
 
         public boolean doRequest(final EasyGspServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException {
 
+
                 String uri = null;
                 String contextPath = httpServletRequest.getServletContext().getContextPath();
                 if (contextPath.length() > 1) {
@@ -310,6 +311,8 @@ public class EasyGsp2 {
 
                                         try {
                                                 checkUserAuthorization(route, httpServletRequest);
+
+                                                appListener.onRequestStart(httpServletRequest);
 
                                                 String contentType = httpServletRequest.getContentType();
                                                 int contentLength = httpServletRequest.getContentLength();
