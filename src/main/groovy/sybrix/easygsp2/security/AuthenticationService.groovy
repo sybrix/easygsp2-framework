@@ -7,9 +7,9 @@ import sybrix.easygsp2.models.TokenResponse
 import javax.servlet.http.HttpServletRequest
 
 interface AuthenticationService {
-        public Long validateCredentials(String username, String password) throws UnauthorizedException
+        public ProfileInfo validateCredentials(String username, String password) throws UnauthorizedException
 
-        public Long validatePhoneCredentials(String username, String code) throws UnauthorizedException
+        public ProfileInfo validatePhoneCredentials(String username, String code) throws UnauthorizedException
 
         public List<String> getRoles(String id)
 

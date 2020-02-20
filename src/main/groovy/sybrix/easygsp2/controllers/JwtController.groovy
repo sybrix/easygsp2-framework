@@ -11,8 +11,10 @@ import sybrix.easygsp2.security.AuthenticationService
 import sybrix.easygsp2.security.ClaimType
 import sybrix.easygsp2.security.Claims
 import sybrix.easygsp2.security.JwtUtil
+import sybrix.easygsp2.security.ProfileInfo
 import sybrix.easygsp2.util.Base64
 import sybrix.easygsp2.util.PropertiesFile
+import sybrix.easygsp2.util.Validator
 
 import javax.servlet.ServletContext
 import javax.servlet.http.HttpServletRequest
@@ -61,16 +63,15 @@ class JwtController {
         }
 
         public TokenResponse authenticateCode(String emailAddress, String code, Long expirySeconds, ServletContext context) {
-                Long profileId = authenticationService.validatePhoneCredentials(emailAddress, code)
+                ProfileInfo profileInfo = authenticationService.validatePhoneCredentials(emailAddress, code)
 
-                authenticate(profileId, emailAddress, expirySeconds, context)
-
+                authenticate(profileInfo.profileId, profileInfo.email, expirySeconds, context)
         }
 
         public TokenResponse authenticatePassword(String emailAddress, String password, Long expirySeconds, ServletContext context) {
-                Long profileId = authenticationService.validateCredentials(emailAddress, password)
+                ProfileInfo profileInfo = authenticationService.validateCredentials(emailAddress, password)
 
-                authenticate(profileId, emailAddress, expirySeconds, context)
+                authenticate(profileInfo.profileId, profileInfo.email, expirySeconds, context)
         }
 
         public TokenResponse authenticate(Long profileId, String emailAddress, Long expirySeconds, ServletContext context) {
@@ -79,15 +80,12 @@ class JwtController {
 
         public static TokenResponse authenticate(Long profileId, String emailAddress, Long expirySeconds, ServletContext context, AuthenticationService authenticationService) {
 
-                // 24 hours default
-
                 LocalDateTime currentTime = LocalDateTime.now()
                 LocalDateTime expireTime = currentTime.plusSeconds(expirySeconds);
                 Date expiryDate = Date.from(expireTime.atZone(ZoneId.systemDefault()).toInstant());
 
                 Claims claims = new Claims()
                 claims.add(ClaimType.SUBJECT, emailAddress)
-                claims.add(ClaimType.EXPIRATION_TIMESTAMP, String.valueOf(expiryDate.time))
                 claims.add(ClaimType.EXPIRATION_TIMESTAMP, String.valueOf(expiryDate.time))
                 claims.add(ClaimType.PROFILE_ID, profileId.toString())
 
