@@ -10,17 +10,17 @@ class ClassFactory {
         static GroovyObject create(Class cls, Object app){
                 def instance = cls.newInstance()
                 if (isProperty(cls,"propertiesFile")){
-                        println("propertiesFile")
+                        //println("propertiesFile")
                         instance.propertiesFile =  app.propertiesFile
                 }
 
                 if (isProperty(cls,"emailService")){
-                        println("emailService")
+                        //println("emailService")
                         instance.emailService =  app.emailService
                 }
 
                 if (isProperty(cls,"authenticationService")){
-                        println("authenticationService")
+                        //println("authenticationService")
                         instance.authenticationService =  app.getAuthenticationService()
                 }
 

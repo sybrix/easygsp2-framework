@@ -323,9 +323,7 @@ public class EasyGsp2 {
                                                 controllerClass = route.getControllerClass();
                                                 m = route.getControllerMethod();
 
-                                                System.out.println(this);
                                                 GroovyObject controller = ClassFactory.create(controllerClass, getOwner());
-
 
                                                 List<String> s = lookupParameterNames(m, groovyClassLoader);
                                                 Parameter[] parameters = m.getParameters();
@@ -339,7 +337,7 @@ public class EasyGsp2 {
                                                 for (Parameter p : parameters) {
                                                         String parameterName = p.getName();
                                                         if (s.size() >= parameters.length) {
-                                                                parameterName = s.get(i);
+                                                                    parameterName = s.get(i);
                                                         }
 
                                                         Class clazz = p.getType();
