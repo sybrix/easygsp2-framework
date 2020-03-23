@@ -436,7 +436,6 @@ public class EasyGsp2 {
                                                         throw new BadRequestException(errors);
                                                 }
 
-
                                                 Object _controllerResponse = invokeControllerAction(controller, m, params, route);
 
                                                 ControllerResponse controllerResponse = ControllerResponse.parse(_controllerResponse);

@@ -8,7 +8,7 @@ class ClassFactory {
         }
 
         static GroovyObject create(Class cls, Object app){
-                def instance = cls.newInstance()
+                GroovyObject instance = cls.newInstance()
                 if (isProperty(cls,"propertiesFile")){
                         //println("propertiesFile")
                         instance.propertiesFile =  app.propertiesFile
@@ -22,6 +22,10 @@ class ClassFactory {
                 if (isProperty(cls,"authenticationService")){
                         //println("authenticationService")
                         instance.authenticationService =  app.getAuthenticationService()
+                }
+
+                if (instance.metaClass.respondsTo(instance, 'init')){
+                        instance.init()
                 }
 
                 instance
