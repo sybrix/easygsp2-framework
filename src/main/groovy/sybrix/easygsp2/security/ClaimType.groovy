@@ -10,7 +10,8 @@ enum ClaimType {
     ISSUED_AT_TIMESTAMP('iat'),
     UNIQUE_ID('jti'),
     VALIDATED('val'),
-    PROFILE_ID('pid')
+    PROFILE_ID('pid'),
+    PROFILE_AD_ID('pad')
 
     private final String claimName
 

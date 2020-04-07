@@ -4,15 +4,18 @@ package sybrix.easygsp2.security;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.impl.crypto.MacProvider;
 import sybrix.easygsp2.framework.ThreadBag;
+import sybrix.easygsp2.models.TokenResponse;
 import sybrix.easygsp2.util.Base64;
 import sybrix.easygsp2.util.PropertiesFile;
 import sybrix.easygsp2.util.StringUtil;
 
 import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.security.Key;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
@@ -80,7 +83,7 @@ public class JwtUtil {
                 return compactJws;
         }
 
-        public boolean verify(String token) {
+        public static boolean verify(String token) {
                 try {
                         Jwts.parser().setSigningKey(key).parseClaimsJws(token);
                         return true;
@@ -121,6 +124,17 @@ public class JwtUtil {
 //
 //                return false;
 //        }
+
+        public static Jws<io.jsonwebtoken.Claims> parseJwtClaims(String token) {
+                try {
+                        Jws<io.jsonwebtoken.Claims> claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token);
+                        return claims;
+
+                } catch (Exception e) {
+                        logger.severe("jwt parsing failed. " + e.getMessage());
+                }
+                return null;
+        }
 
         public static Jws<io.jsonwebtoken.Claims> parseJwtClaims(HttpServletRequest request) {
                 try {
