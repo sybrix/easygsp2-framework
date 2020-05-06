@@ -16,9 +16,9 @@ class GroovyBeanUtil {
                                         destination[it.name] = source[it.name]
                                 }
                         } catch (MissingPropertyException e) {
-                                log.debug(e.getMessage())
+                                log.warn(e.getMessage())
                         } catch (Exception e) {
-                                log.error(e.getMessage(), e)
+                                log.debug(e.getMessage(), e)
                         }
                 }
         }
