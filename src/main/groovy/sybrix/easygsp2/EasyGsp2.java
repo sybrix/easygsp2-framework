@@ -330,6 +330,12 @@ public class EasyGsp2 {
 
                                                 logger.debug("invoking method " + controllerClass.getName() + "." + m.getName() + "(), parameters: " + extractParameterTypes(parameters));
                                                 logger.debug("parameter names: " + s);
+                                                Enumeration<String> names = httpServletRequest.getHeaderNames();
+
+                                                while(names.hasMoreElements()){
+                                                        String header = names.nextElement();
+                                                        logger.debug("header name/value: " +  header + ":" + httpServletRequest.getHeader(header));
+                                                }
 
                                                 Object[] params = new Object[parameters.length];
 
@@ -598,7 +604,6 @@ public class EasyGsp2 {
                         } else if (returnContentType.getBaseType().equals(APPLICATION_HTML_TEXT.getBaseType())) {
                                 sendError(e.getStatus(), new CustomServletBinding(httpServletRequest.getServletContext(), httpServletRequest, httpServletResponse), extractException(e));
                         }
-
 
                 } catch (Exception x) {
                         logger.debug("error occurred writing back to client on bad request", e);
