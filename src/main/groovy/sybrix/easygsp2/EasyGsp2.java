@@ -332,9 +332,9 @@ public class EasyGsp2 {
                                                 logger.debug("parameter names: " + s);
                                                 Enumeration<String> names = httpServletRequest.getHeaderNames();
 
-                                                while(names.hasMoreElements()){
+                                                while (names.hasMoreElements()) {
                                                         String header = names.nextElement();
-                                                        logger.debug("header name/value: " +  header + ":" + httpServletRequest.getHeader(header));
+                                                        logger.debug("header name/value: " + header + ":" + httpServletRequest.getHeader(header));
                                                 }
 
                                                 Object[] params = new Object[parameters.length];
@@ -343,7 +343,7 @@ public class EasyGsp2 {
                                                 for (Parameter p : parameters) {
                                                         String parameterName = p.getName();
                                                         if (s.size() >= parameters.length) {
-                                                                    parameterName = s.get(i);
+                                                                parameterName = s.get(i);
                                                         }
 
                                                         Class clazz = p.getType();
@@ -587,7 +587,7 @@ public class EasyGsp2 {
                                         msg = jsonSerializerInstance.toString(apiError);
                                 } else {
                                         ApiError apiError = new ApiError(e.getMessage());
-                                        if (e.getErrorCode()!=null) {
+                                        if (e.getErrorCode() != null) {
                                                 apiError.setCode(e.getErrorCode());
                                         } else {
                                                 apiError.setCode(e.getStatus());
@@ -680,11 +680,15 @@ public class EasyGsp2 {
 
         private MimeType determineMimeTypeToReturn(Boolean apiRequest, List<MimeType> accepts, Route route, String extension) throws MimeTypeParseException {
                 if (accepts == null) {
-                        throw new UnsupportedContentType("No accept header");
+                        accepts = new ArrayList<MimeType>();
                 }
 
                 if (accepts.size() == 0) {
-                        throw new UnsupportedContentType();
+                        if (apiRequest == true) {
+                                return MimeTypes.getMimeTypes().get(".json");
+                        } else {
+                                return MimeTypes.getMimeTypes().get(".html");
+                        }
                 }
 
                 if (!StringUtil.isEmpty(extension) && route.getProducesMimeType().size() == 0) {
