@@ -212,4 +212,7 @@ public class JwtUtil {
                 return new UserPrincipal();
         }
 
+        public static UserPrincipal extractUserPrincipal(String token) {
+                return new UserPrincipal(key, token);
+        }
 }

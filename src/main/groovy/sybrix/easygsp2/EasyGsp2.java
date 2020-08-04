@@ -275,7 +275,7 @@ public class EasyGsp2 {
 
                         for (Pattern s : ignoredUrlPatterns) {
                                 if (s.matcher(uri).matches()) {
-                                        logger.info("url: " + uri + " found on ignore list");
+                                        logger.debug("url: " + uri + " found on ignore list");
                                         return true;
                                 }
                         }

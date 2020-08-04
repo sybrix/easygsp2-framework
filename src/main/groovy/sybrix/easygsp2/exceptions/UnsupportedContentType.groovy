@@ -6,7 +6,7 @@ import sybrix.easygsp2.http.HttpStatus
 class UnsupportedContentType extends HttpException{
 
         UnsupportedContentType() {
-                super(HttpStatus.UNSUPPORTED_MEDIA_TYPE.val())
+                super("unsupported media type", HttpStatus.UNSUPPORTED_MEDIA_TYPE.val())
         }
 
         UnsupportedContentType(String message) {
