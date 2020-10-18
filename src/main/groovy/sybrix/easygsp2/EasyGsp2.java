@@ -495,8 +495,6 @@ public class EasyGsp2 {
                                                 //if (e.getMessage().equalsIgnoreCase("EMAIL_NOT_VALIDATED")) {
                                                 processException(e, true, returnContentType, httpServletRequest, httpServletResponse);
                                                 //}
-
-
                                                 return false;
                                         } catch (HttpException e) {
                                                 logger.debug(e.getMessage(), e);
@@ -1536,12 +1534,12 @@ public class EasyGsp2 {
         public static sybrix.easygsp2.routing.Route findRoute(String uri, String method) {
                 for (sybrix.easygsp2.routing.Route r : routes.values()) {
                         if (r.matches(uri, method)) {
-                                logger.debug("matching route found! " + r.toString());
+                                logger.info("matching route found! " + r.toString());
                                 return r;
                         }
                 }
 
-                logger.debug("no matching route found for " + uri);
+                logger.info("no matching route found for " + uri);
 
                 return null;
         }

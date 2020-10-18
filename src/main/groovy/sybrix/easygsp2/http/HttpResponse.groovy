@@ -34,4 +34,7 @@ class HttpResponse {
                 new HttpResponse(HttpStatus.BAD_REQUEST)
         }
 
+        public static HttpResponse SERVER_ERROR() {
+                new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR)
+        }
 }
