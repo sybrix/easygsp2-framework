@@ -317,7 +317,6 @@ public class EasyGsp2 {
                                                 String contentType = httpServletRequest.getContentType();
                                                 int contentLength = httpServletRequest.getContentLength();
 
-
                                                 Method m = null;
 
                                                 controllerClass = route.getControllerClass();
@@ -1534,12 +1533,12 @@ public class EasyGsp2 {
         public static sybrix.easygsp2.routing.Route findRoute(String uri, String method) {
                 for (sybrix.easygsp2.routing.Route r : routes.values()) {
                         if (r.matches(uri, method)) {
-                                logger.info("matching route found! " + r.toString());
+                                logger.debug("matching route found! " + r.toString());
                                 return r;
                         }
                 }
 
-                logger.info("no matching route found for " + uri);
+                logger.debug("no matching route found for " + uri);
 
                 return null;
         }
