@@ -1,6 +1,6 @@
 package sybrix.easygsp2.controllers
 
-
+import sybrix.easygsp2.data.JsonSerializerImpl
 import sybrix.easygsp2.exceptions.BadRequestException
 import sybrix.easygsp2.http.HttpResponse
 import sybrix.easygsp2.http.HttpStatus
@@ -52,18 +52,19 @@ class JwtController {
                 }
                 String decodedAuthorizationHeader = new String(Base64.decode(authorizationHeader.substring(6)))
 
-                def parts = decodedAuthorizationHeader.split(":")
-                String phone = parts[0]
-                String code = parts[1]
+                //def parts = decodedAuthorizationHeader.split(":")
+                JsonSerializerImpl jsonSerializer = new JsonSerializerImpl()
+                MobilePhone mobilePhone = jsonSerializer.parse(decodedAuthorizationHeader.substring(0,decodedAuthorizationHeader.length()-1), MobilePhone.class)
+                String code = mobilePhone.smsCode
 
                 //PropertiesFile propertiesFile = (PropertiesFile) request.getServletContext().getAttribute(PropertiesFile.KEY)
                 Long expirySeconds = propertiesFile.getLong("jwt.expires_in_seconds", (60 * 60 * 24))
 
-                authenticateCode(phone, code, expirySeconds, request.getServletContext())
+                authenticateCode(mobilePhone, code, expirySeconds, request.getServletContext())
         }
 
-        public TokenResponse authenticateCode(String emailAddress, String code, Long expirySeconds, ServletContext context) {
-                ProfileInfo profileInfo = authenticationService.validatePhoneCredentials(emailAddress, code)
+        public TokenResponse authenticateCode(MobilePhone mobilePhone, String code, Long expirySeconds, ServletContext context) {
+                ProfileInfo profileInfo = authenticationService.validatePhoneCredentials(mobilePhone, code)
 
                 authenticate(profileInfo.profileId, profileInfo.email, expirySeconds, context)
         }
@@ -119,3 +120,9 @@ class JwtController {
 }
 
 
+class MobilePhone {
+        String phone
+        String countryCode
+        String country
+        String smsCode
+}
