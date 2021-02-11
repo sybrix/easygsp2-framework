@@ -104,6 +104,7 @@ public class EasyGsp2 {
         private AuthenticationService authenticationService;
         private Map<String, Object> dynamicProperties = new HashMap<>();
 
+        public static EasyGsp2 instance;
 
         public EasyGsp2(FilterConfig config) {
                 init(config.getServletContext(), config);
@@ -115,6 +116,7 @@ public class EasyGsp2 {
 
         public void init(ServletContext servletContext, Object config) {
                 try {
+                        instance = this;
                         this.context = servletContext;
                         System.setProperty("easygsp.version", "@easygsp_version");
 
@@ -369,7 +371,7 @@ public class EasyGsp2 {
                                                                 requestContext.setResponse(httpServletResponse);
 
                                                                 params[i] = requestContext;
-                                                        } else if (clazz == PropertiesFile.class || parameterName.equalsIgnoreCase("propertieFile")) {
+                                                        } else if (clazz == PropertiesFile.class || parameterName.equalsIgnoreCase("propertiesFile")) {
                                                                 params[i] = propertiesFile;
 
                                                         } else if (clazz == UserPrincipal.class || clazz == Principal.class) {
