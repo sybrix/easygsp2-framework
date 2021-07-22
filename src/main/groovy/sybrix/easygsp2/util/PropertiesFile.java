@@ -15,8 +15,6 @@
  */
 package sybrix.easygsp2.util;
 
-
-
 import sybrix.easygsp2.exceptions.PropertyFileException;
 import sybrix.easygsp2.exceptions.PropertyFormatException;
 
@@ -38,12 +36,12 @@ public class PropertiesFile extends Properties {
 
         /**
          * The fileName is the classpath location of the file relative to the root '/'  of the classpath.<br/>
-         * The root of the classpath starts in the classes dir <br/><br/>
-         * For this path:<br/>
-         * /WEB-INF/classes/env.properties <br/>
-         * <p/>
+         * The root of the classpath starts in the classes dir
+         * For this path:
+         * /WEB-INF/classes/env.properties
+         *
          * fileName = "env.properties"
-         * <p/>
+         * <p></p>
          * <br/><br/>
          * For this path:<br/>
          * /WEB-INF/classes/resources/env.properties <br/>

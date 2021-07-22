@@ -18,7 +18,6 @@ package sybrix.easygsp2.email;
 
 import groovy.transform.ToString;
 
-import javax.servlet.ServletContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

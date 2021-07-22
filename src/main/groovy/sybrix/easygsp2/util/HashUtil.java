@@ -20,7 +20,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * MD5 <br/>
+ * MD5
  * Description :
  */
 public class HashUtil {

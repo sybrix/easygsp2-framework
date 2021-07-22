@@ -16,7 +16,7 @@
 package sybrix.easygsp2.exceptions;
 
 /**
- * PropertyNotFoundException <br/>
+ * PropertyNotFoundException
  * Description :
  */
 public class PropertyFileException extends RuntimeException {

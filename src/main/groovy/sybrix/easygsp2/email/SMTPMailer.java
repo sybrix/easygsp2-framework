@@ -138,7 +138,7 @@ public class SMTPMailer {
                                 props.put("mail.smtp.starttls.enable", "true"); //enable
 
                                 session = Session.getInstance(props,
-                                        new javax.mail.Authenticator() {
+                                        new Authenticator() {
                                                 protected PasswordAuthentication getPasswordAuthentication() {
                                                         return new PasswordAuthentication(username, password);
                                                 }
@@ -151,7 +151,7 @@ public class SMTPMailer {
                                 props.put("mail.smtp.port", "465"); //SMTP Port
 
                                 session = Session.getInstance(props,
-                                        new javax.mail.Authenticator() {
+                                        new Authenticator() {
                                                 protected PasswordAuthentication getPasswordAuthentication() {
                                                         return new PasswordAuthentication(username, password);
                                                 }
@@ -163,7 +163,7 @@ public class SMTPMailer {
                                         props.put("mail.smtp.auth", "true");
 
                                         session = Session.getInstance(props,
-                                                new javax.mail.Authenticator() {
+                                                new Authenticator() {
                                                         protected PasswordAuthentication getPasswordAuthentication() {
                                                                 return new PasswordAuthentication(username, password);
                                                         }

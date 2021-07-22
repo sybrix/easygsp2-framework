@@ -21,7 +21,7 @@ package sybrix.easygsp2.exceptions;
  */
 public class PropertyFormatException extends RuntimeException {
         public PropertyFormatException() {
-                super();    
+                super();
         }
 
         public PropertyFormatException(String message) {

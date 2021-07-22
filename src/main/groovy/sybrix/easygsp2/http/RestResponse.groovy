@@ -1,7 +1,6 @@
-package sybrix.easygsp2.http;
+package sybrix.easygsp2.http
 
 import groovy.json.JsonSlurper
-import groovy.transform.ToString
 import sybrix.easygsp2.data.JsonSerializerImpl
 
 /**

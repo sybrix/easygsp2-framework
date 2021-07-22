@@ -16,8 +16,6 @@
 
 package sybrix.easygsp2.util;
 
-
-import javax.servlet.ServletContext;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -27,9 +25,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Random;
 
 /**
  * StringUtil <br/>
@@ -193,11 +189,11 @@ public class StringUtil {
                 return new Timestamp(System.currentTimeMillis());
         }
 
-        public static String formatDate(java.util.Date val, String format) {
+        public static String formatDate(Date val, String format) {
 
                 Date dt;
-                if (val instanceof java.util.Date) {
-                        dt = new java.util.Date(((Date) val).getTime());
+                if (val instanceof Date) {
+                        dt = new Date(((Date) val).getTime());
 //                } else if (val instanceof java.util.Date) {
 //                        dt = (Date) val;
                 } else if (val == null) {
@@ -218,13 +214,6 @@ public class StringUtil {
                 }
         }
 
-        public static void addProperties(ServletContext app, PropertiesFile propFile) {
-                Enumeration en = propFile.propertyNames();
-                while (en.hasMoreElements()) {
-                        String key = (String) en.nextElement();
-                        app.setAttribute(key, propFile.get(key));
-                }
-        }
 
         public static Date toDate(Object dt) throws ParseException {
                 if (StringUtil.isEmpty(dt.toString())) {

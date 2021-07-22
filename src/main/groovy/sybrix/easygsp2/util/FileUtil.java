@@ -19,7 +19,7 @@ package sybrix.easygsp2.util;
 import java.io.*;
 
 /**
- * FileUtil <br/>
+ * FileUtil
  *
  * @author David Lee
  */
