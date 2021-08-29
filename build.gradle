@@ -22,7 +22,7 @@ publishing {
 
 java {
         //withJavadocJar()
-//        withSourcesJar()
+        withSourcesJar()
 }
 
 dependencies {
