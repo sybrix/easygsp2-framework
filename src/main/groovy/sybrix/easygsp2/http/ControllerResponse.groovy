@@ -41,7 +41,7 @@ class ControllerResponse {
                 if (obj instanceof HttpResponse) {
                         return new ControllerResponse(
 
-                                httpCode: (obj as HttpResponse).code,
+                                httpCode: (obj as HttpResponse).httpStatusCode,
                                 isEntity: (obj as HttpResponse).entity != null,
                                 entity: obj
                         )

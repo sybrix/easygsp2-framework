@@ -1,25 +1,35 @@
 package sybrix.easygsp2.http
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+
 class HttpResponse {
         Integer code
+        @JsonIgnore
+        Integer httpStatusCode
         Object entity
 
         HttpResponse(HttpStatus httpStatus, Object obj) {
-                code = httpStatus.val()
+                httpStatusCode = httpStatus.val()
+                this.entity = obj
+        }
+
+        HttpResponse(Integer statusCode, Integer errorCode, Object obj) {
+                this.code = errorCode
+                this.httpStatusCode = statusCode
                 this.entity = obj
         }
 
         HttpResponse(Integer statusCode, Object obj) {
-                this.code = statusCode
+                this.httpStatusCode = statusCode
                 this.entity = obj
         }
 
         HttpResponse(Integer statusCode) {
-                this.code = statusCode
+                this.httpStatusCode = statusCode
         }
 
         HttpResponse(HttpStatus httpStatus) {
-                this.code = httpStatus.val()
+                this.httpStatusCode = httpStatus.val()
         }
 
         public static HttpResponse OK() {
