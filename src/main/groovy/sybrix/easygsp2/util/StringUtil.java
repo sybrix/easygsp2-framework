@@ -26,6 +26,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * StringUtil <br/>
@@ -82,6 +83,23 @@ public class StringUtil {
                         return "";
                 }
                 return java.net.URLEncoder.encode(s, "UTF-8");
+        }
+
+        public static Integer len(String s) throws UnsupportedEncodingException {
+                if (s == null) {
+                        return 0;
+                }
+                return s.length();
+        }
+
+        public static String commaSeparate(List l)  {
+                StringBuffer sb = new StringBuffer();
+
+                for (Object id : l) {
+                        sb.append(id);
+                        sb.append(",");
+                }
+                return sb.substring(0, sb.length() - 1);
         }
 
         public static String htmlEncode(String s) {
