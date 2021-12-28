@@ -289,7 +289,7 @@ public class EasyGsp2 {
                         final List<FileItem> uploads = FileUpload.parseFileUploads(httpServletRequest, propertiesFile);
 
                         ThreadBag.set(new ThreadVariables(this.context, httpServletRequest, httpServletResponse, routes, null, null, groovyClassLoader));
-                        logger.debug("searching for matching route for uri: " + uri);
+                          logger.debug("searching for matching route for uri: " + uri);
 
                         final sybrix.easygsp2.routing.Route route = findRoute(uri, httpServletRequest.getMethod());
                         if (route == null) {
@@ -467,7 +467,6 @@ public class EasyGsp2 {
                                                 if (Boolean.TRUE.equals(redirectIssued)) {
                                                         return false;
                                                 }
-
 
                                                 logger.debug("return content type: " + returnContentType.toString());
 
