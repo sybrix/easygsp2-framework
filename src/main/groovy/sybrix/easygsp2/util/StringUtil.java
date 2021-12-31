@@ -85,7 +85,7 @@ public class StringUtil {
                 return java.net.URLEncoder.encode(s, "UTF-8");
         }
 
-        public static Integer len(String s) throws UnsupportedEncodingException {
+        public static Integer len(String s){
                 if (s == null) {
                         return 0;
                 }
