@@ -79,10 +79,16 @@ public class PropertiesFile extends Properties {
 
                 try {
                         if (fileName.toLowerCase().startsWith("classpath:")) {
-                                URL url = getClass().getClassLoader().getResource(fileName.substring(10));
-                                FileInputStream fis = new FileInputStream(url.getFile());
-                                load(fis);
-                                fis.close();
+                                try {
+                                        URL url = getClass().getClassLoader().getResource(fileName.substring(10));
+                                        FileInputStream fis = new FileInputStream(url.getFile());
+                                        load(fis);
+                                        fis.close();
+                                }catch (Exception e){
+                                        InputStream fis = getClass().getResourceAsStream("/" + fileName.substring(10));
+                                        load(fis);
+                                        fis.close();
+                                }
                         } else {
 
                                 Reader fis = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), "ISO-8859-1"));
