@@ -52,7 +52,21 @@ public class StringUtil {
 
                 return returnVal;
         }
+        public static boolean parseBoolean(Object value) {
+                try {
+                        if (isEmpty(value)) {
+                                return false;
+                        }
 
+                        if ("true".equalsIgnoreCase(value.toString()) || "1".equalsIgnoreCase(value.toString())) {
+                                return true;
+                        }
+
+                        return Boolean.parseBoolean(value.toString());
+                }catch (Exception e){
+                        return false;
+                }
+        }
 
         public static boolean isEmpty(Object value) {
                 if (value == null) {
