@@ -121,7 +121,6 @@ public class EasyGspServletRequest implements HttpServletRequest {
                 return null;
         }
 
-
         public boolean isUserInRole(String role) {
                 HttpSession session = request.getSession(false);
                 Jws<io.jsonwebtoken.Claims> claims = ThreadBag.get().getClaims();

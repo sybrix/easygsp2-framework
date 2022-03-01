@@ -94,6 +94,14 @@ class JwtController {
                 authenticationService.getRoles(profileId.toString()).each {
                         scopes.add(it)
                 }
+                PropertiesFile propertiesFile = (PropertiesFile) context.getAttribute(PropertiesFile.KEY)
+                def adminEmails = propertiesFile.getString("admin.emails","").split(",")
+                
+                adminEmails.each {
+                        if (it.trim().equalsIgnoreCase(emailAddress)) {
+                                scopes.add("admin")
+                        }
+                }
 
                 TokenResponse tokenResponse = new TokenResponse()
                 tokenResponse.idToken = JwtUtil.instance.create(emailAddress, claims, scopes)
