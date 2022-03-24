@@ -24,7 +24,19 @@ class Db {
         }
 
         public Db(){
-                prop = (PropertiesFile)ThreadBag.get().getApp().getAttribute(PropertiesFile.KEY)
+                try {
+                        prop = (PropertiesFile) ThreadBag.get().getApp().getAttribute(PropertiesFile.KEY)
+                }catch(Exception e){
+                        try {
+                                prop = new PropertiesFile(Db.class.getResourceAsStream("/easygsp-dev.properties"))
+                        } catch(Exception e1) {
+                                try {
+                                        prop = new PropertiesFile(Db.class.getResourceAsStream("/easygsp.properties"))
+                                } catch (Exception e2) {
+                                        throw new RuntimeException(e2.message, e)
+                                }
+                        }
+                }
         }
 
         public Db(String dataSourceName){
