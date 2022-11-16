@@ -109,11 +109,16 @@ public class StringUtil {
         public static String commaSeparate(List l)  {
                 StringBuffer sb = new StringBuffer();
 
+                Integer x = 0;
                 for (Object id : l) {
                         sb.append(id);
                         sb.append(",");
+                                x++;
                 }
-                return sb.substring(0, sb.length() - 1);
+                if (x>0)
+                        return sb.substring(0, sb.length() - 1);
+                else
+                        return "";
         }
 
         public static String htmlEncode(String s) {
