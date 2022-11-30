@@ -133,4 +133,5 @@ class MobilePhone {
         String countryCode
         String country
         String smsCode
+        String email
 }
