@@ -18,6 +18,7 @@ package sybrix.easygsp2.email;
 
 import sybrix.easygsp2.exceptions.SMTPMailerException;
 import sybrix.easygsp2.exceptions.SendEmailException;
+import sybrix.easygsp2.util.StringUtil;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -176,7 +177,10 @@ public class SMTPMailer {
 
                         MimeMessage message = new MimeMessage(session);
 
-                        message.setFrom(new InternetAddress(email.getFrom()));
+                        if (StringUtil.isEmpty(email.getSenderName()))
+                                message.setFrom(new InternetAddress(email.getFrom()));
+                        else
+                                message.setFrom(new InternetAddress(email.getFrom(), email.getSenderName()));
 
                         List<String> recipients = email.getRecipients();
                         List<String> bccRecipients = email.getBcc();

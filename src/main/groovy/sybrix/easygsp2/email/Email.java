@@ -40,6 +40,9 @@ public class Email {
         private String htmlBody="";
         private String subject;
 
+        private String senderName;
+
+
         private Map attachments = new HashMap();
        // private ServletContext app;
 
@@ -103,4 +106,11 @@ public class Email {
                 this.attachments = attachments;
         }
 
+        public String getSenderName() {
+                return senderName;
+        }
+
+        public void setSenderName(String senderName) {
+                this.senderName = senderName;
+        }
 }
