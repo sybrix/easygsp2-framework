@@ -114,6 +114,9 @@ public class StringUtil {
                 if (length <= 0) {
                         return "";
                 }
+                if (s.length()<=length) {
+                        length = s.length();
+                }
 
                 return s.substring(0,length);
         }
