@@ -106,6 +106,18 @@ public class StringUtil {
                 return s.length();
         }
 
+        public static String limitLength(String s, int length){
+                if (s == null) {
+                        return "";
+                }
+
+                if (length <= 0) {
+                        return "";
+                }
+
+                return s.substring(0,length-1);
+        }
+
         public static String commaSeparate(List l)  {
                 StringBuffer sb = new StringBuffer();
 
