@@ -115,7 +115,7 @@ public class StringUtil {
                         return "";
                 }
 
-                return s.substring(0,length-1);
+                return s.substring(0,length);
         }
 
         public static String commaSeparate(List l)  {
