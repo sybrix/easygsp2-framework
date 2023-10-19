@@ -52,12 +52,12 @@ dependencies {
         api 'org.hibernate.validator:hibernate-validator:6.0.7.Final'
 
         api 'org.mindrot:jbcrypt:0.4'
-
-        api 'org.slf4j:slf4j-ext:1.8.0-alpha2'
-
+        
+        compileOnly group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.2'
+        compileOnly group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.2'
+        api 'org.slf4j:slf4j-ext:2.0.9'
+        
         compileOnly 'javax.servlet:javax.servlet-api:3.1.0'
-        compileOnly group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'
-        compileOnly group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.10.0'
         compileOnly group: 'javax.persistence', name: 'persistence-api', version: '1.0.2'
 
 //        api 'sybrix:easygsp-util:1.0.0'
