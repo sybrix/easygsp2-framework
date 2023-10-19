@@ -136,13 +136,13 @@ public class StringUtil {
                         return "";
         }
 
-        public static String lastPart(String s, char delimiter)  {
-               try {
-                       String parts[] = s.split(new String(new char[delimiter]));
-                       return parts[parts.length - 1];
-               }catch (Exception e){
-                       throw new RuntimeException("lastPart exception s:"  + s + ", delimiter:"+ delimiter,e);
-               }
+        public static String lastPart(String s, String delimiter) {
+                try {
+                        String[] parts = s.split(delimiter);
+                        return parts[parts.length - 1];
+                } catch (Exception var3) {
+                        throw new RuntimeException("lastPart exception s:" + s + ", delimiter:" + delimiter, var3);
+                }
         }
 
         public static String htmlEncode(String s) {
