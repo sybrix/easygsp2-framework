@@ -29,7 +29,7 @@ class UserPrincipal implements Principal {
                 authType = "BASIC_AUTH"
                 Jws<io.jsonwebtoken.Claims> claims = Jwts.parser().setSigningKey(key).parseClaimsJws(jwt);
                 io.jsonwebtoken.Claims body = claims.getBody()
-                id = Long.parseLong(body.get(ClaimType.PROFILE_ID.val()))
+                id = sybrix.easygsp2.util.NumberUtil.toLong(body.get(ClaimType.PROFILE_ID.val()),0)
 
                 username = body.getSubject()
 
