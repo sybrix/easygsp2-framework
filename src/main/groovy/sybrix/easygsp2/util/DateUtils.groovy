@@ -53,8 +53,8 @@ class DateUtils {
                 }
                 
                 def diff = current.time - ts.time
-                def _diffDays = (((diff/1000)/60)/60)
-                return _diffDays
+                def _diffHours = (((diff/1000)/60)/60)
+                return _diffHours
         }
 
         static  def diffDays(java.sql.Timestamp current, java.sql.Timestamp ts) {
