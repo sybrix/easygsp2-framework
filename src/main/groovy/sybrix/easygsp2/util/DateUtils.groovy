@@ -25,16 +25,26 @@ class DateUtils {
                 return Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
         }
 
-        public static daysSince(Date date) {
+        public static Integer daysSince(Date date) {
                 def diff = System.currentTimeMillis() - date.time
 
                 (diff / (1000 * 60 * 60 * 24)).toInteger()
         }
-
-        public static diffSeconds(Date date1, Date date2) {
+        
+        public static Integer minutesSince(Date date) {
+                minutesSince(date.time)
+        }
+        
+        public static Integer minutesSince(Long date) {
+                def diff = System.currentTimeMillis() - date
+                
+                (diff / (1000 * 60)).toInteger()
+        }
+        
+        public static Integer diffSeconds(Date date1, Date date2) {
                 def diff = date1.time - date2.time
 
-                (diff / (1000 * 60)).toInteger()
+                (diff / (1000)).toInteger()
         }
 
         static  def diffMinutes(java.sql.Timestamp current, java.sql.Timestamp ts) {
