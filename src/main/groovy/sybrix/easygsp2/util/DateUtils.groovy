@@ -47,7 +47,7 @@ class DateUtils {
                 (diff / (1000)).toInteger()
         }
         
-        public static Integer diffSeconds(Date date) {
+        public static Integer secondsSince(Date date) {
                 def diff = System.currentTimeMillis() - date.time
                 
                 (diff / (1000)).toInteger()
