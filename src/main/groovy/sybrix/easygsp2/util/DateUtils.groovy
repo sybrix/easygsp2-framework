@@ -46,7 +46,13 @@ class DateUtils {
 
                 (diff / (1000)).toInteger()
         }
-
+        
+        public static Integer diffSeconds(Date date) {
+                def diff = System.currentTimeMillis() - date.time
+                
+                (diff / (1000)).toInteger()
+        }
+        
         static  def diffMinutes(java.sql.Timestamp current, java.sql.Timestamp ts) {
                 if (ts == null || current == null){
                         return 0
