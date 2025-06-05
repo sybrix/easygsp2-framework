@@ -35,6 +35,10 @@ class HttpResponse {
         public static HttpResponse OK() {
                 new HttpResponse(HttpStatus.OK)
         }
+        
+        public static HttpResponse NOT_MODIFIED() {
+                new HttpResponse(HttpStatus.NOT_MODIFIED)
+        }
 
         public static HttpResponse NOT_FOUND() {
                 new HttpResponse(HttpStatus.NOT_FOUND)
