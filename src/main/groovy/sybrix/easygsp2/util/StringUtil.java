@@ -58,8 +58,18 @@ public class StringUtil {
                                 return false;
                         }
 
-                        if ("true".equalsIgnoreCase(value.toString()) || "1".equalsIgnoreCase(value.toString())) {
+                        if ("true".equalsIgnoreCase(value.toString()) || "1".equalsIgnoreCase(value.toString())
+                                || "y".equalsIgnoreCase(value.toString())
+                                || "T".equalsIgnoreCase(value.toString())
+                        ) {
                                 return true;
+                        }
+
+                        if ("false".equalsIgnoreCase(value.toString()) || "0".equalsIgnoreCase(value.toString())
+                                || "f".equalsIgnoreCase(value.toString())
+                                || "n".equalsIgnoreCase(value.toString())
+                        ) {
+                                return false;
                         }
 
                         return Boolean.parseBoolean(value.toString());
