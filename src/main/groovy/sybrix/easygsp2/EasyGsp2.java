@@ -1,6 +1,8 @@
 package sybrix.easygsp2;
 
 import groovy.lang.*;
+import groovy.text.SimpleTemplateEngine;
+import groovy.text.Template;
 import io.jsonwebtoken.ExpiredJwtException;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -18,9 +20,7 @@ import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeElementsScanner;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
-import sybrix.easygsp2.anno.Api;
-import sybrix.easygsp2.anno.Content;
-import sybrix.easygsp2.anno.Secured;
+import sybrix.easygsp2.anno.*;
 import sybrix.easygsp2.categories.RoutingCategory;
 import sybrix.easygsp2.controllers.JwtController;
 import sybrix.easygsp2.data.Serializer;
@@ -32,6 +32,8 @@ import sybrix.easygsp2.framework.*;
 import sybrix.easygsp2.http.MediaType;
 import sybrix.easygsp2.http.ControllerResponse;
 import sybrix.easygsp2.http.MimeTypes;
+import sybrix.easygsp2.models.ClaudeAPI;
+import sybrix.easygsp2.models.ClaudeAPIParameter;
 import sybrix.easygsp2.models.CreateClientRequest;
 import sybrix.easygsp2.routing.MethodAndRole;
 import sybrix.easygsp2.routing.Route;
@@ -41,10 +43,18 @@ import sybrix.easygsp2.security.*;
 import sybrix.easygsp2.templates.RequestError;
 import sybrix.easygsp2.templates.TemplateInfo;
 import sybrix.easygsp2.templates.TemplateWriter;
+import sybrix.easygsp2.util.JsonTypeConverter;
 import sybrix.easygsp2.util.PropertiesFile;
+import sybrix.easygsp2.util.StringUtil;
 
 import javax.activation.MimeType;
 import javax.activation.MimeTypeParseException;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import javax.servlet.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -57,6 +67,11 @@ import java.lang.reflect.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.Principal;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -70,6 +85,7 @@ import org.slf4j.LoggerFactory;
 import sybrix.easygsp2.util.StringUtil;
 
 import static sybrix.easygsp2.util.StringUtil.combine;
+import static sybrix.easygsp2.util.StringUtil.isEmpty;
 
 /**
  * Created by dsmith on 7/19/16.
@@ -170,6 +186,8 @@ public class EasyGsp2 {
 
                         loadDefaultRoutes();//1
                         loadApiMethods(propertiesFile);//2
+                        loadClaudAPIDocs(propertiesFile);
+                        //generateEnhancedClaudeAPIDocs(propertiesFile);
                         loadUnannotatedClasses(propertiesFile, "controllers.package"); //3 order matters
                         loadUnannotatedClasses(propertiesFile, "api.controllers.package"); //3 order matters
                         loadSerializers(propertiesFile);
@@ -689,7 +707,7 @@ public class EasyGsp2 {
                         }
                 }
 
-                if (!StringUtil.isEmpty(extension) && route.getProducesMimeType().size() == 0) {
+                if (!isEmpty(extension) && route.getProducesMimeType().size() == 0) {
                         if (MimeTypes.getMimeTypes().containsKey(extension)) {
                                 return MimeTypes.getMimeTypes().get(extension);
                         }
@@ -1318,6 +1336,460 @@ public class EasyGsp2 {
                         }
                 }
         }
+
+        private void loadClaudAPIDocs(PropertiesFile propertiesFile) {
+                try {
+                        String claudeTemplate = propertiesFile.getString("claude.md.template.path");
+                        String claudeOutputPath = propertiesFile.getString("claude.md.out.path");
+                        String startToken = propertiesFile.getString("claude.md.start.token");
+                        String endToken = propertiesFile.getString("claude.md.end.token");
+
+                        if (claudeTemplate == null || claudeOutputPath == null || startToken == null || endToken == null) {
+                                return;
+                        }
+
+                        logger.debug("loading annotated controllers for Claude docs...");
+                        Reflections reflections = new Reflections("", new MethodAnnotationsScanner(), new SubTypesScanner());
+                        Set<Method> methods = reflections.getMethodsAnnotatedWith(Api.class);
+                        List<ClaudeAPI> claudeDocs = new ArrayList<ClaudeAPI>();
+
+                        for (Method m : methods) {
+                                ClaudeAPI claudeAPI = new ClaudeAPI();
+
+                                Api classAnno = extractClassAnnotation(m.getDeclaringClass().getDeclaredAnnotations());
+                                classesWithApiAnnotation.add(m.getDeclaringClass().getName());
+
+                                Api methodAnno = m.getDeclaredAnnotation(Api.class);
+                                if (isEmpty(methodAnno.description())){
+                                        continue;
+                                }
+                                claudeAPI.setDescription(methodAnno.description());
+                                claudeAPI.setMethod(StringUtil.commaSeparate(Arrays.asList(methodAnno.method())).toUpperCase());
+                                claudeAPI.setPath(StringUtil.commaSeparate(Arrays.asList(methodAnno.url())));
+                                try {
+                                        // Get return type information
+                                        Class<?> returnType = m.getReturnType();
+                                        Type genericReturnType = m.getGenericReturnType();
+
+                                        // Check for circular references in the return type
+                                        if (!returnType.isPrimitive() && !returnType.equals(Void.TYPE) &&
+                                            !returnType.equals(String.class) && !Number.class.isAssignableFrom(returnType) &&
+                                            !returnType.equals(Boolean.class)) {
+                                                try {
+                                                        boolean hasCircularRefs = JsonTypeConverter.hasCircularReferences(returnType);
+                                                        claudeAPI.setHasCircularReferences(hasCircularRefs);
+                                                } catch (Exception ex) {
+                                                        logger.debug("Could not check for circular references in type: " + returnType.getName(), ex);
+                                                }
+                                        }
+
+                                        // For primitive types and simple types, use the string representation
+                                        if (returnType.equals(Void.TYPE) || returnType.equals(void.class)) {
+                                                claudeAPI.setReturnType("void");
+                                        } else if (returnType.isPrimitive() ||
+                                                   returnType.equals(String.class) ||
+                                                   Number.class.isAssignableFrom(returnType) ||
+                                                   returnType.equals(Boolean.class)) {
+                                                // For simple types, use the JSON type name as a string
+                                                String jsonType = JsonTypeConverter.getJsonType(returnType, genericReturnType);
+                                                claudeAPI.setReturnType(jsonType);
+                                        } else {
+                                                // For complex types, generate the object structure
+                                                try {
+                                                        // Use the new method that returns an Object (Map) for proper template rendering
+                                                        Object jsonStructure = JsonTypeConverter.classToJsonTypesAsObject(returnType);
+                                                        claudeAPI.setReturnType(jsonStructure);
+                                                } catch (Exception ex) {
+                                                        // If that fails, fall back to the simple type name
+                                                        String typeName = JsonTypeConverter.getJsonType(returnType, genericReturnType);
+                                                        claudeAPI.setReturnType(typeName);
+                                                }
+                                        }
+                                } catch (Exception e) {
+                                        logger.debug("Could not determine return type for method: " + m.getName(), e);
+                                        claudeAPI.setReturnType("object");
+                                }
+
+                                Secured securedMethodAnno = m.getDeclaredAnnotation(Secured.class);
+                                boolean secured = (securedMethodAnno != null);
+                                claudeAPI.setAuthenticateRequired(secured);
+
+                                Params qsParams = m.getAnnotation(Params.class);
+                                if (qsParams != null) {
+                                        for (Param param : qsParams.value()) {
+                                                if (param !=null) {
+                                                        ClaudeAPIParameter claudeAPIParameter = new ClaudeAPIParameter();
+                                                        claudeAPIParameter.setName(param.name());
+                                                        claudeAPIParameter.setRequired(param.required());
+                                                        claudeAPIParameter.setType(param.type());
+                                                        claudeAPIParameter.setDescription(param.description());
+
+                                                        if (param.queryString()) {
+                                                                claudeAPI.getQueryStringParameters().add(claudeAPIParameter);
+                                                        } else {
+                                                                claudeAPI.getPathParameters().add(claudeAPIParameter);
+                                                        }
+                                                }
+                                        }
+                                }
+
+
+                                Parameter[] methodParams = m.getParameters();
+                                if (methodParams != null) {
+                                        for (Parameter parameter : methodParams) {
+                                                if (parameter.isAnnotationPresent(Param.class)) {
+                                                        Param param = parameter.getAnnotation(Param.class);
+                                                        if (param != null) {
+                                                                ClaudeAPIParameter claudeAPIParameter = new ClaudeAPIParameter();
+                                                                claudeAPIParameter.setName(param.name());
+                                                                claudeAPIParameter.setRequired(param.required());
+                                                                claudeAPIParameter.setType(JsonTypeConverter.getJsonType(parameter.getType(), null));
+                                                                claudeAPIParameter.setDescription(param.description());
+                                                                claudeAPI.getParameters().add(claudeAPIParameter);
+                                                        }
+                                                }
+                                        }
+                                }
+                                // BUGFIX: Move claudeDocs.add outside the methodParams check
+                                // so methods without parameters are also documented
+                                claudeDocs.add(claudeAPI);
+                        }
+
+
+                        Map binding = new HashMap();
+                        binding.put("claudeDocs", claudeDocs);
+                        String s = buildTemplate(claudeTemplate, binding);
+
+                        replaceTextInFile(claudeOutputPath, startToken, endToken, s);
+                }catch (Exception e){
+                        logger.error("writing claude docs failed. " + e.getMessage(), e);
+                }
+        }
+
+        /**
+         * Enhanced method to properly scan controller methods for annotations and generate API documentation.
+         * This method provides a more comprehensive approach to generating Claude API documentation.
+         *
+         * @param propertiesFile The properties file containing configuration for Claude documentation
+         */
+        public void generateEnhancedClaudeAPIDocs(PropertiesFile propertiesFile) {
+                try {
+                        String claudeOutputPath = propertiesFile.getString("claude.output");
+                        String claudeTemplate = propertiesFile.getString("claude.template");
+                        String startToken = propertiesFile.getString("claude.startToken", "<!-- start docs -->");
+                        String endToken = propertiesFile.getString("claude.endToken", "<!-- end docs -->");
+
+                        if (claudeOutputPath == null || claudeTemplate == null) {
+                                logger.info("Claude docs not configured. Skipping generation.");
+                                return;
+                        }
+
+                        List<ClaudeAPI> claudeDocs = new ArrayList<>();
+
+                        // Get all classes with @Api annotations
+                        Reflections reflections = new Reflections("",
+                                new SubTypesScanner(false),
+                                new TypeElementsScanner(),
+                                new MethodAnnotationsScanner());
+
+                        Set<Method> methodsWithApiAnnotation = reflections.getMethodsAnnotatedWith(Api.class);
+
+                        for (Method method : methodsWithApiAnnotation) {
+                                ClaudeAPI claudeAPI = new ClaudeAPI();
+
+                                // Get Api annotation from method
+                                Api apiAnnotation = method.getAnnotation(Api.class);
+
+                                // Set basic properties
+                                claudeAPI.setDescription(apiAnnotation.description());
+                                claudeAPI.setProtocol("https");
+
+                                // Handle URLs - support multiple URLs
+                                if (apiAnnotation.url() != null && apiAnnotation.url().length > 0) {
+                                        claudeAPI.setPath(StringUtil.commaSeparate(Arrays.asList(apiAnnotation.url())));
+                                }
+
+                                // Handle HTTP methods - support multiple methods
+                                if (apiAnnotation.method() != null && apiAnnotation.method().length > 0) {
+                                        claudeAPI.setMethod(StringUtil.commaSeparate(Arrays.asList(apiAnnotation.method())).toUpperCase());
+                                }
+
+                                // Check if authentication is required
+                                boolean classSecured = method.getDeclaringClass().isAnnotationPresent(Secured.class);
+                                boolean methodSecured = method.isAnnotationPresent(Secured.class);
+                                claudeAPI.setAuthenticateRequired(classSecured || methodSecured);
+
+                                // Set return type information
+                                try {
+                                        // Get return type information
+                                        Class<?> returnType = method.getReturnType();
+                                        Type genericReturnType = method.getGenericReturnType();
+
+                                        // Check for circular references in the return type
+                                        if (!returnType.isPrimitive() && !returnType.equals(Void.TYPE) &&
+                                            !returnType.equals(String.class) && !Number.class.isAssignableFrom(returnType) &&
+                                            !returnType.equals(Boolean.class)) {
+                                                try {
+                                                        boolean hasCircularRefs = JsonTypeConverter.hasCircularReferences(returnType);
+                                                        claudeAPI.setHasCircularReferences(hasCircularRefs);
+                                                } catch (Exception ex) {
+                                                        logger.debug("Could not check for circular references in type: " + returnType.getName(), ex);
+                                                }
+                                        }
+
+                                        // For primitive types and simple types, use the string representation
+                                        if (returnType.equals(Void.TYPE) || returnType.equals(void.class)) {
+                                                claudeAPI.setReturnType("void");
+                                        } else if (returnType.isPrimitive() ||
+                                                   returnType.equals(String.class) ||
+                                                   Number.class.isAssignableFrom(returnType) ||
+                                                   returnType.equals(Boolean.class)) {
+                                                // For simple types, use the JSON type name as a string
+                                                String jsonType = JsonTypeConverter.getJsonType(returnType, genericReturnType);
+                                                claudeAPI.setReturnType(jsonType);
+                                        } else {
+                                                // For complex types, generate the object structure
+                                                try {
+                                                        // Use the new method that returns an Object (Map) for proper template rendering
+                                                        Object jsonStructure = JsonTypeConverter.classToJsonTypesAsObject(returnType);
+                                                        claudeAPI.setReturnType(jsonStructure);
+                                                } catch (Exception ex) {
+                                                        // If that fails, fall back to the simple type name
+                                                        String typeName = JsonTypeConverter.getJsonType(returnType, genericReturnType);
+                                                        claudeAPI.setReturnType(typeName);
+                                                }
+                                        }
+                                } catch (Exception e) {
+                                        logger.debug("Could not determine return type for method: " + method.getName(), e);
+                                        claudeAPI.setReturnType("object");
+                                }
+
+                                // Process @Params annotation (for query string parameters)
+                                Params paramsAnnotation = method.getAnnotation(Params.class);
+                                if (paramsAnnotation != null) {
+                                        for (Param param : paramsAnnotation.value()) {
+                                                if (param != null) {
+                                                        if (param.queryString()) {
+                                                                ClaudeAPIParameter claudeAPIParameter = new ClaudeAPIParameter();
+                                                                claudeAPIParameter.setName(param.name());
+                                                                claudeAPIParameter.setRequired(param.required());
+                                                                claudeAPIParameter.setType(param.type());
+                                                                claudeAPIParameter.setDescription(param.description());
+                                                                claudeAPI.getQueryStringParameters().add(claudeAPIParameter);
+                                                        }
+                                                }
+                                        }
+                                }
+
+                                // Process individual @Param annotations (repeatable)
+                                Param[] individualParams = method.getAnnotationsByType(Param.class);
+                                for (Param param : individualParams) {
+                                        // Skip if already processed via @Params
+                                        boolean alreadyProcessed = claudeAPI.getQueryStringParameters().stream()
+                                                .anyMatch(p -> p.getName().equals(param.name()));
+
+                                        if (!alreadyProcessed) {
+                                                ClaudeAPIParameter claudeAPIParameter = new ClaudeAPIParameter();
+                                                claudeAPIParameter.setName(param.name());
+                                                claudeAPIParameter.setRequired(param.required());
+                                                claudeAPIParameter.setType(param.type());
+                                                claudeAPIParameter.setDescription(param.description());
+                                                claudeAPI.getQueryStringParameters().add(claudeAPIParameter);
+                                        }
+                                }
+
+                                // Process method parameters
+                                Parameter[] methodParams = method.getParameters();
+                                if (methodParams != null) {
+                                        for (Parameter parameter : methodParams) {
+                                                // Skip special framework parameters
+                                                if (isFrameworkParameter(parameter.getType())) {
+                                                        continue;
+                                                }
+
+                                                // Check for @Param annotation on parameter
+                                                if (parameter.isAnnotationPresent(Param.class)) {
+                                                        Param param = parameter.getAnnotation(Param.class);
+                                                        ClaudeAPIParameter claudeAPIParameter = new ClaudeAPIParameter();
+                                                        claudeAPIParameter.setName(param.name());
+                                                        claudeAPIParameter.setRequired(param.required());
+                                                        claudeAPIParameter.setType(JsonTypeConverter.getJsonType(parameter.getType(), null));
+                                                        claudeAPIParameter.setDescription(param.description());
+                                                        claudeAPI.getParameters().add(claudeAPIParameter);
+                                                }
+                                        }
+                                }
+
+                                // Extract path parameters from URL pattern
+                                extractPathParameters(claudeAPI);
+
+                                // Generate request body example if applicable
+                                if (hasRequestBody(apiAnnotation)) {
+                                        try {
+                                                Parameter[] params = method.getParameters();
+                                                if (params != null && params.length > 0) {
+                                                        // Find the first non-framework parameter as the body parameter
+                                                        for (Parameter param : params) {
+                                                                if (!isFrameworkParameter(param.getType())) {
+                                                                        try {
+                                                                                // Use the Object version for proper template rendering
+                                                                                Object jsonBody = JsonTypeConverter.classToJsonTypesAsObject(param.getType());
+                                                                                claudeAPI.setBody(jsonBody);
+                                                                                break;
+                                                                        } catch (Exception ex) {
+                                                                                // If that fails, skip this parameter
+                                                                                logger.debug("Could not generate body for parameter type: " + param.getType().getName(), ex);
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+                                        } catch (Exception e) {
+                                                logger.debug("Could not generate body example for method: " + method.getName(), e);
+                                                claudeAPI.setBody(null);
+                                        }
+                                }
+
+                                // Add to documentation list
+                                claudeDocs.add(claudeAPI);
+                        }
+
+                        // Sort by path for consistent output
+                        claudeDocs.sort(Comparator.comparing(ClaudeAPI::getPath));
+
+                        // Generate documentation using template
+                        Map<String, Object> binding = new HashMap<>();
+                        binding.put("claudeDocs", claudeDocs);
+                        String generatedDocs = buildTemplate(claudeTemplate, binding);
+                        replaceTextInFile(claudeOutputPath, startToken, endToken, generatedDocs);
+
+                        logger.info("Successfully generated Claude API documentation for " + claudeDocs.size() + " endpoints");
+
+                } catch (Exception e) {
+                        logger.error("Failed to generate enhanced Claude docs: " + e.getMessage(), e);
+                }
+        }
+
+        /**
+         * Check if a parameter type is a framework-specific type that shouldn't be documented
+         */
+        private boolean isFrameworkParameter(Class<?> type) {
+                String typeName = type.getName();
+                return typeName.equals("javax.servlet.http.HttpServletRequest") ||
+                       typeName.equals("javax.servlet.http.HttpServletResponse") ||
+                       typeName.equals("javax.servlet.http.HttpSession") ||
+                       typeName.equals("sybrix.easygsp2.UserPrincipal") ||
+                       typeName.equals("sybrix.easygsp2.http.Request") ||
+                       typeName.equals("sybrix.easygsp2.http.Response") ||
+                       typeName.equals("groovy.lang.Binding") ||
+                       typeName.equals("org.apache.commons.fileupload.FileItem") ||
+                       type.isAssignableFrom(List.class) && typeName.contains("FileItem");
+        }
+
+        /**
+         * Extract path parameters from URL pattern (e.g., /api/user/{id} or /api/profile/{<\\d+$>profileAdId})
+         */
+        private void extractPathParameters(ClaudeAPI claudeAPI) {
+                String path = claudeAPI.getPath();
+                if (path == null) {
+                        return;
+                }
+
+                // Split multiple paths if comma-separated
+                String[] paths = path.split(",");
+                Set<String> processedParams = new HashSet<>();
+
+                for (String singlePath : paths) {
+                        // Find parameters in the format {paramName} or {<pattern$>paramName}
+                        Pattern pattern = Pattern.compile("\\{(<[^>]+>)?([^}]+)\\}");
+                        Matcher matcher = pattern.matcher(singlePath.trim());
+
+                        while (matcher.find()) {
+                                String paramName = matcher.group(2);
+
+                                // Skip if already processed
+                                if (processedParams.contains(paramName)) {
+                                        continue;
+                                }
+                                processedParams.add(paramName);
+
+                                // Check if this parameter is already documented
+                                boolean alreadyDocumented = claudeAPI.getParameters().stream()
+                                        .anyMatch(p -> p.getName().equals(paramName)) ||
+                                        claudeAPI.getQueryStringParameters().stream()
+                                        .anyMatch(p -> p.getName().equals(paramName));
+
+                                if (!alreadyDocumented) {
+                                        ClaudeAPIParameter pathParam = new ClaudeAPIParameter();
+                                        pathParam.setName(paramName);
+                                        pathParam.setType("string");
+                                        pathParam.setRequired(true);
+                                        pathParam.setDescription("");
+                                        pathParam.setParameter(paramName);
+                                        claudeAPI.getQueryStringParameters().add(pathParam);
+                                }
+                        }
+                }
+        }
+
+        /**
+         * Check if the API method typically has a request body based on HTTP method
+         */
+        private boolean hasRequestBody(Api api) {
+                if (api.method() == null || api.method().length == 0) {
+                        return false;
+                }
+
+                for (String method : api.method()) {
+                        String upperMethod = method.toUpperCase();
+                        if (upperMethod.equals("POST") || upperMethod.equals("PUT") ||
+                            upperMethod.equals("PATCH") || upperMethod.equals("DELETE")) {
+                                return true;
+                        }
+                }
+
+                return false;
+        }
+
+        private void replaceTextInFile(String filePath,
+                                                      String startToken,
+                                                      String endToken,
+                                                      String newContent) {
+                try {
+                        Path path = Paths.get(filePath);
+
+                        // Read file content
+                        String content = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+
+                        // Build regex: everything between startToken and endToken (non-greedy)
+                        String regex = "(?s)(" + Pattern.quote(startToken) + ")(.*?)(" + Pattern.quote(endToken) + ")";
+
+                        // Replace with preserved tokens
+                        // Use Matcher.quoteReplacement to escape any $ or \ in newContent
+                        String safeNewContent = java.util.regex.Matcher.quoteReplacement(newContent);
+                        String replaced = content.replaceAll(regex, "$1\n" + safeNewContent + "\n$3");
+
+                        // Write back to file
+                        Files.write(path, replaced.getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING);
+                }catch (IOException e){
+                        logger.error("replaceTextInFile failed. filePath: " + filePath + ", startToken: " + startToken + ", endToken: " + endToken + ", newContent: " + newContent + ".  " + e.getMessage(), e);
+                }
+        }
+
+        private String buildTemplate(String templatePath,Map binding){
+                try {
+                        SimpleTemplateEngine engine = new groovy.text.SimpleTemplateEngine();
+                        Reader r = new InputStreamReader(new FileInputStream(templatePath));
+
+                        Template template = engine.createTemplate(r);
+
+                        return template.make(binding).toString().replaceAll("(?m)^(?:\\s*\\r?\\n){3}", "");//.replaceAll("<br>","");
+
+                }catch (IOException e){
+
+                }
+                return "";
+        }
+
 
         private Api extractClassAnnotation(Annotation[] declaredAnnotations) {
 

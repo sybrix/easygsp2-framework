@@ -22,4 +22,9 @@ public @interface Api {
         String[] accepts() default {};
 
         String[] contentType() default {};
+
+        String  description() default "";
+
+        String [] path_param_description() default {"*"};
+
 }
