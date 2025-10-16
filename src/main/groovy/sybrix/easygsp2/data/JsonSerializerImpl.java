@@ -1,10 +1,8 @@
 package sybrix.easygsp2.data;
 
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import groovy.json.JsonSlurper;
 import sybrix.easygsp2.exceptions.ParameterDeserializationException;
 
@@ -39,6 +37,17 @@ public class JsonSerializerImpl implements Serializer {
         public String toString(Object o) {
                 ObjectMapper objectMapper = new ObjectMapper();
                 try {
+                        return objectMapper.writeValueAsString(o);
+                } catch (Exception e) {
+                        throw new RuntimeException("error converting object to json, " + e.getMessage(), e);
+                }
+        }
+
+        public String toStringJodaTime(Object o) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                try {
+                        objectMapper.registerModule(new JodaModule());
+                        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
                         return objectMapper.writeValueAsString(o);
                 } catch (Exception e) {
                         throw new RuntimeException("error converting object to json, " + e.getMessage(), e);
