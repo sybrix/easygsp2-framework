@@ -24,11 +24,7 @@ public class JsonSerializerImpl implements Serializer {
 
 //                        ChunkedOutputStream chunkedOutputStream = new ChunkedOutputStream(httpServletResponse.getOutputStream());
                         objectMapper.writeValue(outputStream, o);
-//                        chunkedOutputStream.finish();
 
-//                        httpServletResponse.getOutputStream().flush();
-
-                        //System.out.println(new String(byteArrayOutputStream.toByteArray()));
                 } catch (Exception e) {
                         throw new RuntimeException("error converting object to json, " + e.getMessage(), e);
                 }
